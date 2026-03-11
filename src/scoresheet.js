@@ -27,7 +27,6 @@ let scores = {};
 let activePlayerIndex = 0;
 let hasRolledThisTurn = false;
 let turnPossibleScores = null;
-let selectedComboId = null;
 
 function initScores() {
   scores = {};
@@ -77,16 +76,12 @@ function addScoreRow(tbody, combo) {
   for (let p = 0; p < NUM_PLAYERS; p++) {
     const cell = document.createElement('td');
     cell.className = 'score-cell';
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.min = 0;
-    input.max = combo.max;
-    input.placeholder = '—';
-    input.readOnly = true;
-    input.dataset.combo = combo.id;
-    input.dataset.player = p;
-    input.addEventListener('click', () => onTurnScoreClick(combo.id, p));
-    cell.appendChild(input);
+    const value = document.createElement('span');
+    value.className = 'score-value';
+    value.dataset.combo = combo.id;
+    value.dataset.player = p;
+    cell.addEventListener('click', () => onTurnScoreClick(combo.id, p));
+    cell.appendChild(value);
     tr.appendChild(cell);
   }
 
@@ -105,13 +100,11 @@ function addTotalRow(tbody, id, label) {
   for (let p = 0; p < NUM_PLAYERS; p++) {
     const cell = document.createElement('td');
     cell.className = 'score-cell';
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.readOnly = true;
-    input.placeholder = '0';
-    input.dataset.totalId = id;
-    input.dataset.player = p;
-    cell.appendChild(input);
+    const value = document.createElement('span');
+    value.className = 'total-value';
+    value.dataset.totalId = id;
+    value.dataset.player = p;
+    cell.appendChild(value);
     tr.appendChild(cell);
   }
 
@@ -133,13 +126,11 @@ function addBonusRow(tbody) {
   for (let p = 0; p < NUM_PLAYERS; p++) {
     const cell = document.createElement('td');
     cell.className = 'score-cell';
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.readOnly = true;
-    input.placeholder = '—';
-    input.dataset.totalId = 'bonus';
-    input.dataset.player = p;
-    cell.appendChild(input);
+    const value = document.createElement('span');
+    value.className = 'total-value';
+    value.dataset.totalId = 'bonus';
+    value.dataset.player = p;
+    cell.appendChild(value);
     tr.appendChild(cell);
   }
 
@@ -158,13 +149,11 @@ function addGrandTotalRow(tbody) {
   for (let p = 0; p < NUM_PLAYERS; p++) {
     const cell = document.createElement('td');
     cell.className = 'score-cell';
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.readOnly = true;
-    input.placeholder = '0';
-    input.dataset.totalId = 'grand';
-    input.dataset.player = p;
-    cell.appendChild(input);
+    const value = document.createElement('span');
+    value.className = 'total-value';
+    value.dataset.totalId = 'grand';
+    value.dataset.player = p;
+    cell.appendChild(value);
     tr.appendChild(cell);
   }
 
@@ -176,8 +165,14 @@ function onTurnScoreClick(comboId, playerIndex) {
   if (!hasRolledThisTurn || !turnPossibleScores) return;
   if (scores[comboId][playerIndex] !== null) return;
 
-  selectedComboId = comboId;
+  const selectedScore = turnPossibleScores[comboId] || 0;
+  setScore(comboId, playerIndex, selectedScore);
+  clearTurnState();
   renderTurnSuggestions();
+
+  if (typeof window.advanceToNextPlayer === 'function') {
+    window.advanceToNextPlayer();
+  }
 }
 
 function getScoreInput(comboId, playerIndex) {
@@ -189,10 +184,9 @@ function setScore(comboId, playerIndex, value) {
   if (!input) return;
 
   scores[comboId][playerIndex] = value;
-  input.value = String(value);
+  input.textContent = String(value);
   input.classList.add('filled');
-  input.classList.remove('suggested', 'selected-choice');
-  input.placeholder = '—';
+  input.classList.remove('suggested');
 
   updateTotals(playerIndex);
 }
@@ -200,7 +194,6 @@ function setScore(comboId, playerIndex, value) {
 function clearTurnState() {
   hasRolledThisTurn = false;
   turnPossibleScores = null;
-  selectedComboId = null;
 }
 
 function renderTurnSuggestions() {
@@ -213,23 +206,22 @@ function renderTurnSuggestions() {
     const canShowSuggestion = committedScore === null && hasRolledThisTurn && !!turnPossibleScores;
 
     if (committedScore !== null) {
-      input.value = String(committedScore);
+      input.textContent = String(committedScore);
       input.classList.add('filled');
-      input.classList.remove('suggested', 'selected-choice');
+      input.classList.remove('suggested');
       if (row) row.classList.remove('is-turn-selectable');
       return;
     }
 
     if (!canShowSuggestion) {
-      input.value = '';
-      input.classList.remove('suggested', 'selected-choice');
+      input.textContent = '';
+      input.classList.remove('suggested');
       if (row) row.classList.remove('is-turn-selectable');
       return;
     }
 
-    input.value = String(turnPossibleScores[combo.id] || 0);
+    input.textContent = String(turnPossibleScores[combo.id] || 0);
     input.classList.add('suggested');
-    input.classList.toggle('selected-choice', selectedComboId === combo.id);
     if (row) row.classList.add('is-turn-selectable');
   });
 }
@@ -237,30 +229,8 @@ function renderTurnSuggestions() {
 function onRollResult({ playerIndex, diceValues }) {
   activePlayerIndex = playerIndex;
   hasRolledThisTurn = true;
-  selectedComboId = null;
   turnPossibleScores = computePossibleScores(diceValues);
   renderTurnSuggestions();
-}
-
-function onTryNextPlayer({ playerIndex }) {
-  if (playerIndex !== activePlayerIndex) {
-    activePlayerIndex = playerIndex;
-  }
-
-  if (!hasRolledThisTurn || !turnPossibleScores) {
-    return { ok: false, message: 'Lancez les des avant de passer au joueur suivant.' };
-  }
-
-  if (!selectedComboId) {
-    return { ok: false, message: 'Selectionnez une ligne de score a valider.' };
-  }
-
-  const selectedScore = turnPossibleScores[selectedComboId] || 0;
-  setScore(selectedComboId, playerIndex, selectedScore);
-  clearTurnState();
-  renderTurnSuggestions();
-
-  return { ok: true };
 }
 
 function onPlayerChange(playerIndex) {
@@ -275,7 +245,7 @@ function updateTotals(player) {
 
   const bonus = subUpper >= 63 ? 35 : 0;
   document.querySelectorAll(`[data-total-id="bonus"][data-player="${player}"]`).forEach(inp => {
-    inp.value = bonus > 0 ? '+35' : '';
+    inp.textContent = bonus > 0 ? '+35' : '';
   });
 
   setTotal('total_upper', player, subUpper + bonus);
@@ -290,7 +260,7 @@ function updateTotals(player) {
 
 function setTotal(id, player, value) {
   document.querySelectorAll(`[data-total-id="${id}"][data-player="${player}"]`).forEach(inp => {
-    inp.value = value > 0 ? value : '';
+    inp.textContent = value > 0 ? String(value) : '';
   });
 }
 
@@ -301,7 +271,7 @@ function checkWinner() {
   const grandInputs = document.querySelectorAll('[data-total-id="grand"]');
   let max = -1, winnerIdx = -1;
   grandInputs.forEach((inp, i) => {
-    const v = parseInt(inp.value) || 0;
+    const v = parseInt(inp.textContent) || 0;
     if (v > max) { max = v; winnerIdx = i; }
   });
 
@@ -312,11 +282,11 @@ function checkWinner() {
 window.resetGrid = function () {
   if (!confirm('Réinitialiser toute la grille ?')) return;
   initScores();
-  document.querySelectorAll('.score-cell input[data-combo]').forEach(inp => {
-    inp.value = '';
-    inp.classList.remove('filled', 'suggested', 'selected-choice');
+  document.querySelectorAll('.score-value[data-combo]').forEach(inp => {
+    inp.textContent = '';
+    inp.classList.remove('filled', 'suggested');
   });
-  document.querySelectorAll('[data-total-id]').forEach(inp => { inp.value = ''; });
+  document.querySelectorAll('.total-value[data-total-id]').forEach(inp => { inp.textContent = ''; });
   clearTurnState();
   activePlayerIndex = 0;
   renderTurnSuggestions();
@@ -338,6 +308,5 @@ buildTable();
 initYamsPlayPanel({
   onMessage: showToast,
   onRollResult,
-  onTryNextPlayer,
   onPlayerChange,
 });

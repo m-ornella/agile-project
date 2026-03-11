@@ -5,7 +5,6 @@ const TOTAL_PLAYERS = 4
 export function initYamsPlayPanel({
   onMessage,
   onRollResult,
-  onTryNextPlayer,
   onPlayerChange,
 } = {}) {
   const panel = document.getElementById('playPanel')
@@ -14,7 +13,6 @@ export function initYamsPlayPanel({
   const activePlayerValue = document.getElementById('activePlayerValue')
   const rollsRemainingValue = document.getElementById('rollsRemainingValue')
   const rollButton = document.getElementById('rollButton')
-  const nextPlayerButton = document.getElementById('nextPlayerButton')
   const diceButtons = Array.from(panel.querySelectorAll('.die-button'))
   const playerNameInputs = Array.from(document.querySelectorAll('.player-name-input'))
 
@@ -48,7 +46,7 @@ export function initYamsPlayPanel({
     } else if (turnState.rollsRemaining > 0) {
       rollButton.textContent = 'Relancer les des selectionnes'
     } else {
-      rollButton.textContent = 'Tour termine'
+      rollButton.textContent = 'Choisissez un score'
     }
 
     diceButtons.forEach((button, index) => {
@@ -89,22 +87,14 @@ export function initYamsPlayPanel({
     }
   })
 
-  nextPlayerButton.addEventListener('click', () => {
-    if (typeof onTryNextPlayer === 'function') {
-      const result = onTryNextPlayer({ playerIndex: currentPlayer })
-      if (!result?.ok) {
-        notify(result?.message || 'Validation du score requise.')
-        return
-      }
-    }
-
+  const advanceToNextPlayer = () => {
     currentPlayer = (currentPlayer + 1) % TOTAL_PLAYERS
     resetTurn()
 
     if (typeof onPlayerChange === 'function') {
       onPlayerChange(currentPlayer)
     }
-  })
+  }
 
   diceButtons.forEach(button => {
     button.addEventListener('click', () => {
@@ -128,6 +118,7 @@ export function initYamsPlayPanel({
       onPlayerChange(currentPlayer)
     }
   }
+  window.advanceToNextPlayer = advanceToNextPlayer
 
   render()
 
