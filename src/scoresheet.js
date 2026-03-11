@@ -1,3 +1,5 @@
+import { initYamsPlayPanel } from './game/yamsPlayPanel';
+
 const UPPER_COMBOS = [
   { id: 'ones',   name: 'As',      desc: 'Somme des 1',  max: 5  },
   { id: 'twos',   name: 'Deux',    desc: 'Somme des 2',  max: 10 },
@@ -228,6 +230,9 @@ window.resetGrid = function () {
     inp.classList.remove('filled');
   });
   document.querySelectorAll('[data-total-id]').forEach(inp => { inp.value = ''; });
+  if (typeof window.resetPlayPanel === 'function') {
+    window.resetPlayPanel();
+  }
   showToast('Grille réinitialisée');
 };
 
@@ -240,3 +245,4 @@ function showToast(msg) {
 
 initScores();
 buildTable();
+initYamsPlayPanel({ onMessage: showToast });
