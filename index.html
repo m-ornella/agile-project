@@ -1,13 +1,58 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>agile-project</title>
-    <link rel="stylesheet" href="/src/style.css" />
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yams</title>
+  <link rel="stylesheet" href="./src/css/scoresheet.css">
+</head>
+<body>
+
+<h1>🎲 YAMS</h1>
+<p class="subtitle">Feuille de score officielle</p>
+
+<div class="scoresheet">
+  <table id="scoreTable">
+    <thead>
+      <tr class="header-row">
+        <th class="col-combo">Combinaison</th>
+        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 1" maxlength="12" data-player="0"></th>
+        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 2" maxlength="12" data-player="1"></th>
+        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 3" maxlength="12" data-player="2"></th>
+        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 4" maxlength="12" data-player="3"></th>
+      </tr>
+    </thead>
+    <tbody id="scoreBody"></tbody>
+  </table>
+</div>
+
+<section class="play-panel" id="playPanel" aria-label="Interface de jeu">
+  <div class="play-meta">
+    <p><span class="meta-label">Joueur qui joue</span><strong id="activePlayerValue">Joueur 1</strong></p>
+    <p><span class="meta-label">Lancers restants</span><strong id="rollsRemainingValue">3</strong></p>
+  </div>
+
+  <div class="dice-row" role="group" aria-label="Des du joueur">
+    <button class="die-button is-empty" type="button" data-die-index="0" aria-label="De 1">•</button>
+    <button class="die-button is-empty" type="button" data-die-index="1" aria-label="De 2">•</button>
+    <button class="die-button is-empty" type="button" data-die-index="2" aria-label="De 3">•</button>
+    <button class="die-button is-empty" type="button" data-die-index="3" aria-label="De 4">•</button>
+    <button class="die-button is-empty" type="button" data-die-index="4" aria-label="De 5">•</button>
+  </div>
+
+  <p class="play-help">1er lancer: tous les des. Lancers suivants: selectionnez les des a relancer. Cliquez ensuite une proposition pour valider le score.</p>
+
+  <div class="play-actions">
+    <button class="btn" id="rollButton" type="button">Lancer les 5 des</button>
+  </div>
+</section>
+
+<div class="actions">
+  <button class="btn" onclick="resetGrid()">↺ Réinitialiser</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="./src/scoresheet.js"></script>
+</body>
 </html>
