@@ -1,13 +1,37 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>agile-project</title>
-    <link rel="stylesheet" href="/src/style.css" />
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yams</title>
+  <link rel="stylesheet" href="./src/scoresheet.css">
+</head>
+<body>
+
+<h1>🎲 YAMS</h1>
+<p class="subtitle">Feuille de score officielle</p>
+
+<div class="scoresheet">
+  <table id="scoreTable">
+    <thead>
+      <tr class="header-row">
+        <th class="col-combo">Combinaison</th>
+        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 1" maxlength="12" data-player="0"></th>
+        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 2" maxlength="12" data-player="1"></th>
+        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 3" maxlength="12" data-player="2"></th>
+        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 4" maxlength="12" data-player="3"></th>
+      </tr>
+    </thead>
+    <tbody id="scoreBody"></tbody>
+  </table>
+</div>
+
+<div class="actions">
+  <button class="btn" onclick="resetGrid()">↺ Réinitialiser</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="./src/scoresheet.js"></script>
+</body>
 </html>
