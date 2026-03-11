@@ -26,6 +26,28 @@
   </table>
 </div>
 
+<section class="play-panel" id="playPanel" aria-label="Interface de jeu">
+  <div class="play-meta">
+    <p><span class="meta-label">Joueur qui joue</span><strong id="activePlayerValue">Joueur 1</strong></p>
+    <p><span class="meta-label">Lancers restants</span><strong id="rollsRemainingValue">3</strong></p>
+  </div>
+
+  <div class="dice-row" role="group" aria-label="Des du joueur">
+    <button class="die-button is-empty" type="button" data-die-index="0" aria-label="De 1">•</button>
+    <button class="die-button is-empty" type="button" data-die-index="1" aria-label="De 2">•</button>
+    <button class="die-button is-empty" type="button" data-die-index="2" aria-label="De 3">•</button>
+    <button class="die-button is-empty" type="button" data-die-index="3" aria-label="De 4">•</button>
+    <button class="die-button is-empty" type="button" data-die-index="4" aria-label="De 5">•</button>
+  </div>
+
+  <p class="play-help">1er lancer: tous les des. Lancers suivants: selectionnez les des a relancer.</p>
+
+  <div class="play-actions">
+    <button class="btn" id="rollButton" type="button">Lancer les 5 des</button>
+    <button class="btn" id="nextPlayerButton" type="button">Joueur suivant</button>
+  </div>
+</section>
+
 <div class="actions">
   <button class="btn" onclick="resetGrid()">↺ Réinitialiser</button>
 </div>
