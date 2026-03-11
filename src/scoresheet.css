@@ -1,0 +1,159 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Code+Pro:wght@400;600&display=swap');
+
+:root {
+  --ink: #1a1208;
+  --paper: #f5efe0;
+  --paper-dark: #e8dfc8;
+  --accent: #b5432a;
+  --accent-light: #d4694f;
+  --line: #c4b89a;
+  --shadow: rgba(26,18,8,0.15);
+  --green: #2e6e44;
+  --green-light: #3d8a57;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #2c2416;
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.02) 10px, rgba(255,255,255,0.02) 20px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 16px;
+  font-family: 'Source Code Pro', monospace;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  color: var(--paper);
+  font-size: 2.2rem;
+  letter-spacing: 0.15em;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.subtitle {
+  color: #a89070;
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.scoresheet {
+  background: var(--paper);
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.1);
+  overflow: hidden;
+  width: 100%;
+  max-width: 780px;
+  position: relative;
+}
+
+.scoresheet::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23f5efe0'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23c4b89a' opacity='0.3'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+table { width: 100%; border-collapse: collapse; position: relative; z-index: 2; }
+
+.header-row th {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 8px;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+  border: 1px solid #3a2e1a;
+}
+
+.header-row th.col-combo { text-align: left; padding-left: 14px; font-size: 0.9rem; }
+
+.section-title td {
+  background: var(--accent);
+  color: white;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border: 1px solid var(--accent-light);
+  font-weight: bold;
+}
+
+.section-title.lower td { background: var(--green); border-color: var(--green-light); }
+
+.score-row td { border: 1px solid var(--line); height: 38px; vertical-align: middle; transition: background 0.15s; }
+.score-row:nth-child(even) td { background: rgba(196,184,154,0.18); }
+.score-row:hover td { background: rgba(181,67,42,0.06); }
+
+.col-combo { padding: 0 12px; font-size: 0.8rem; color: var(--ink); white-space: nowrap; min-width: 160px; }
+.col-combo .combo-name { font-weight: 600; font-size: 0.82rem; }
+.col-combo .combo-desc { font-size: 0.67rem; color: #8a7a60; display: block; line-height: 1.2; }
+.col-combo .combo-max { float: right; background: var(--paper-dark); border: 1px solid var(--line); border-radius: 2px; padding: 1px 5px; font-size: 0.65rem; color: #8a7a60; margin-top: 2px; }
+
+.score-cell { text-align: center; padding: 0; width: 70px; position: relative; }
+
+.score-cell input {
+  width: 100%; height: 36px; border: none; background: transparent;
+  text-align: center; font-family: 'Source Code Pro', monospace;
+  font-size: 1rem; font-weight: 600; color: var(--ink);
+  cursor: pointer; outline: none; transition: background 0.15s, color 0.15s;
+}
+
+.score-cell input:focus { background: rgba(181,67,42,0.12); color: var(--accent); cursor: text; }
+.score-cell input.filled { color: var(--accent); }
+.score-cell input[readonly] { cursor: default; color: #888; font-style: italic; }
+
+.bonus-row td, .total-row td { border: 1px solid var(--line); height: 38px; vertical-align: middle; }
+.bonus-row td { background: rgba(196,184,154,0.35); }
+.total-row td { background: var(--ink); color: var(--paper); font-weight: 700; }
+.total-row .col-combo { color: var(--paper); font-size: 0.85rem; letter-spacing: 0.05em; }
+.total-row .score-cell input { color: var(--paper-dark); font-size: 1.05rem; }
+.total-row .score-cell input:focus { background: rgba(255,255,255,0.1); color: white; }
+.bonus-row .score-cell input { color: var(--green); font-weight: 700; }
+
+.grand-total-row td { background: var(--accent); border: 1px solid var(--accent-light); height: 44px; vertical-align: middle; }
+.grand-total-row .col-combo { color: white; font-family: 'Playfair Display', serif; font-size: 1rem; letter-spacing: 0.08em; }
+.grand-total-row .score-cell input { color: white; font-size: 1.2rem; font-weight: 700; }
+
+.player-name-input {
+  width: 100%; height: 38px; background: transparent; border: none;
+  text-align: center; font-family: 'Playfair Display', serif;
+  font-size: 0.85rem; color: var(--paper); outline: none; cursor: pointer;
+}
+.player-name-input:focus { background: rgba(255,255,255,0.1); border-radius: 3px; }
+.player-name-input::placeholder { color: rgba(245,239,224,0.4); font-style: italic; font-size: 0.75rem; }
+
+.actions { margin-top: 18px; display: flex; gap: 12px; justify-content: flex-end; width: 100%; max-width: 780px; }
+
+.btn {
+  background: none; border: 1px solid #6a5a40; color: #c8a070;
+  padding: 8px 20px; font-family: 'Source Code Pro', monospace;
+  font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px; transition: all 0.2s;
+}
+.btn:hover { background: rgba(245,239,224,0.1); border-color: #a89070; color: var(--paper); }
+
+.toast {
+  position: fixed; bottom: 30px; right: 30px; background: var(--ink);
+  color: var(--paper); padding: 10px 18px; border-radius: 3px;
+  font-size: 0.78rem; letter-spacing: 0.1em; border-left: 3px solid var(--accent);
+  opacity: 0; transform: translateY(10px); transition: all 0.3s;
+  pointer-events: none; z-index: 100;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 600px) {
+  .score-cell { width: 52px; }
+  .col-combo { min-width: 120px; font-size: 0.72rem; }
+  .col-combo .combo-desc { display: none; }
+  .col-combo .combo-max { display: none; }
+}
