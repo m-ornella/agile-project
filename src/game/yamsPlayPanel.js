@@ -2,14 +2,17 @@ import { YamsTurnState } from './yamsTurnState'
 
 const TOTAL_PLAYERS = 4
 
-export function initYamsPlayPanel({ onMessage } = {}) {
+export function initYamsPlayPanel({
+  onMessage,
+  onRollResult,
+  onPlayerChange,
+} = {}) {
   const panel = document.getElementById('playPanel')
   if (!panel) return
 
   const activePlayerValue = document.getElementById('activePlayerValue')
   const rollsRemainingValue = document.getElementById('rollsRemainingValue')
   const rollButton = document.getElementById('rollButton')
-  const nextPlayerButton = document.getElementById('nextPlayerButton')
   const diceButtons = Array.from(panel.querySelectorAll('.die-button'))
   const playerNameInputs = Array.from(document.querySelectorAll('.player-name-input'))
 
@@ -43,7 +46,7 @@ export function initYamsPlayPanel({ onMessage } = {}) {
     } else if (turnState.rollsRemaining > 0) {
       rollButton.textContent = 'Relancer les des selectionnes'
     } else {
-      rollButton.textContent = 'Tour termine'
+      rollButton.textContent = 'Choisissez un score'
     }
 
     diceButtons.forEach((button, index) => {
@@ -69,6 +72,13 @@ export function initYamsPlayPanel({ onMessage } = {}) {
       turnState.roll()
       render()
 
+      if (typeof onRollResult === 'function') {
+        onRollResult({
+          playerIndex: currentPlayer,
+          diceValues: turnState.getDiceValues(),
+        })
+      }
+
       if (turnState.rollsRemaining === 0) {
         notify(`${getPlayerName(currentPlayer)} a termine son tour.`)
       }
@@ -77,10 +87,14 @@ export function initYamsPlayPanel({ onMessage } = {}) {
     }
   })
 
-  nextPlayerButton.addEventListener('click', () => {
+  const advanceToNextPlayer = () => {
     currentPlayer = (currentPlayer + 1) % TOTAL_PLAYERS
     resetTurn()
-  })
+
+    if (typeof onPlayerChange === 'function') {
+      onPlayerChange(currentPlayer)
+    }
+  }
 
   diceButtons.forEach(button => {
     button.addEventListener('click', () => {
@@ -99,7 +113,16 @@ export function initYamsPlayPanel({ onMessage } = {}) {
   window.resetPlayPanel = () => {
     currentPlayer = 0
     resetTurn()
+
+    if (typeof onPlayerChange === 'function') {
+      onPlayerChange(currentPlayer)
+    }
   }
+  window.advanceToNextPlayer = advanceToNextPlayer
 
   render()
+
+  if (typeof onPlayerChange === 'function') {
+    onPlayerChange(currentPlayer)
+  }
 }

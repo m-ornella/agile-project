@@ -33,6 +33,10 @@ export class YamsTurnState {
     return this.selectedForReroll.filter(Boolean).length
   }
 
+  getDiceValues() {
+    return [...this.diceValues]
+  }
+
   roll() {
     if (this.rollsRemaining <= 0) {
       throw new Error('Aucun lancer restant pour ce tour.')
