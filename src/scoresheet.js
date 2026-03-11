@@ -287,6 +287,7 @@ window.resetGrid = function () {
     inp.classList.remove('filled', 'suggested');
   });
   document.querySelectorAll('.total-value[data-total-id]').forEach(inp => { inp.textContent = ''; });
+  document.querySelectorAll('.player-name-input').forEach(inp => { inp.value = ''; });
   clearTurnState();
   activePlayerIndex = 0;
   renderTurnSuggestions();
