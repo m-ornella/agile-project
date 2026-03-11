@@ -1,4 +1,5 @@
 import { initYamsPlayPanel } from './game/yamsPlayPanel';
+import { computePossibleScores } from './game/yamsScoring';
 
 const UPPER_COMBOS = [
   { id: 'ones',   name: 'As',      desc: 'Somme des 1',  max: 5  },
@@ -20,11 +21,17 @@ const LOWER_COMBOS = [
 ];
 
 const NUM_PLAYERS = 4;
+const ALL_COMBOS = [...UPPER_COMBOS, ...LOWER_COMBOS];
+
 let scores = {};
+let activePlayerIndex = 0;
+let hasRolledThisTurn = false;
+let turnPossibleScores = null;
+let selectedComboId = null;
 
 function initScores() {
   scores = {};
-  [...UPPER_COMBOS, ...LOWER_COMBOS].forEach(c => {
+  ALL_COMBOS.forEach(c => {
     scores[c.id] = Array(NUM_PLAYERS).fill(null);
   });
 }
@@ -56,6 +63,7 @@ function addSectionTitle(tbody, label, isLower = false) {
 function addScoreRow(tbody, combo) {
   const tr = document.createElement('tr');
   tr.className = 'score-row';
+  tr.dataset.comboId = combo.id;
 
   const td = document.createElement('td');
   td.className = 'col-combo';
@@ -74,10 +82,10 @@ function addScoreRow(tbody, combo) {
     input.min = 0;
     input.max = combo.max;
     input.placeholder = '—';
+    input.readOnly = true;
     input.dataset.combo = combo.id;
     input.dataset.player = p;
-    input.addEventListener('change', onScoreChange);
-    input.addEventListener('focus', e => e.target.select());
+    input.addEventListener('click', () => onTurnScoreClick(combo.id, p));
     cell.appendChild(input);
     tr.appendChild(cell);
   }
@@ -163,22 +171,102 @@ function addGrandTotalRow(tbody) {
   tbody.appendChild(tr);
 }
 
-function onScoreChange(e) {
-  const input = e.target;
-  const combo = input.dataset.combo;
-  const player = parseInt(input.dataset.player);
-  const val = input.value === '' ? null : parseInt(input.value);
+function onTurnScoreClick(comboId, playerIndex) {
+  if (playerIndex !== activePlayerIndex) return;
+  if (!hasRolledThisTurn || !turnPossibleScores) return;
+  if (scores[comboId][playerIndex] !== null) return;
 
-  const comboObj = [...UPPER_COMBOS, ...LOWER_COMBOS].find(c => c.id === combo);
-  if (val !== null && comboObj && val > comboObj.max) {
-    input.value = comboObj.max;
-    scores[combo][player] = comboObj.max;
-  } else {
-    scores[combo][player] = val;
+  selectedComboId = comboId;
+  renderTurnSuggestions();
+}
+
+function getScoreInput(comboId, playerIndex) {
+  return document.querySelector(`[data-combo="${comboId}"][data-player="${playerIndex}"]`);
+}
+
+function setScore(comboId, playerIndex, value) {
+  const input = getScoreInput(comboId, playerIndex);
+  if (!input) return;
+
+  scores[comboId][playerIndex] = value;
+  input.value = String(value);
+  input.classList.add('filled');
+  input.classList.remove('suggested', 'selected-choice');
+  input.placeholder = '—';
+
+  updateTotals(playerIndex);
+}
+
+function clearTurnState() {
+  hasRolledThisTurn = false;
+  turnPossibleScores = null;
+  selectedComboId = null;
+}
+
+function renderTurnSuggestions() {
+  ALL_COMBOS.forEach(combo => {
+    const input = getScoreInput(combo.id, activePlayerIndex);
+    if (!input) return;
+
+    const row = input.closest('.score-row');
+    const committedScore = scores[combo.id][activePlayerIndex];
+    const canShowSuggestion = committedScore === null && hasRolledThisTurn && !!turnPossibleScores;
+
+    if (committedScore !== null) {
+      input.value = String(committedScore);
+      input.classList.add('filled');
+      input.classList.remove('suggested', 'selected-choice');
+      if (row) row.classList.remove('is-turn-selectable');
+      return;
+    }
+
+    if (!canShowSuggestion) {
+      input.value = '';
+      input.classList.remove('suggested', 'selected-choice');
+      if (row) row.classList.remove('is-turn-selectable');
+      return;
+    }
+
+    input.value = String(turnPossibleScores[combo.id] || 0);
+    input.classList.add('suggested');
+    input.classList.toggle('selected-choice', selectedComboId === combo.id);
+    if (row) row.classList.add('is-turn-selectable');
+  });
+}
+
+function onRollResult({ playerIndex, diceValues }) {
+  activePlayerIndex = playerIndex;
+  hasRolledThisTurn = true;
+  selectedComboId = null;
+  turnPossibleScores = computePossibleScores(diceValues);
+  renderTurnSuggestions();
+}
+
+function onTryNextPlayer({ playerIndex }) {
+  if (playerIndex !== activePlayerIndex) {
+    activePlayerIndex = playerIndex;
   }
 
-  input.classList.toggle('filled', val !== null && input.value !== '');
-  updateTotals(player);
+  if (!hasRolledThisTurn || !turnPossibleScores) {
+    return { ok: false, message: 'Lancez les des avant de passer au joueur suivant.' };
+  }
+
+  if (!selectedComboId) {
+    return { ok: false, message: 'Selectionnez une ligne de score a valider.' };
+  }
+
+  const selectedScore = turnPossibleScores[selectedComboId] || 0;
+  setScore(selectedComboId, playerIndex, selectedScore);
+  clearTurnState();
+  renderTurnSuggestions();
+
+  return { ok: true };
+}
+
+function onPlayerChange(playerIndex) {
+  activePlayerIndex = playerIndex;
+  clearTurnState();
+  renderTurnSuggestions();
 }
 
 function updateTotals(player) {
@@ -207,8 +295,7 @@ function setTotal(id, player, value) {
 }
 
 function checkWinner() {
-  const allCombos = [...UPPER_COMBOS, ...LOWER_COMBOS];
-  const allFilled = allCombos.every(c => scores[c.id].every(v => v !== null));
+  const allFilled = ALL_COMBOS.every(c => scores[c.id].every(v => v !== null));
   if (!allFilled) return;
 
   const grandInputs = document.querySelectorAll('[data-total-id="grand"]');
@@ -225,11 +312,14 @@ function checkWinner() {
 window.resetGrid = function () {
   if (!confirm('Réinitialiser toute la grille ?')) return;
   initScores();
-  document.querySelectorAll('.score-cell input:not([readonly])').forEach(inp => {
+  document.querySelectorAll('.score-cell input[data-combo]').forEach(inp => {
     inp.value = '';
-    inp.classList.remove('filled');
+    inp.classList.remove('filled', 'suggested', 'selected-choice');
   });
   document.querySelectorAll('[data-total-id]').forEach(inp => { inp.value = ''; });
+  clearTurnState();
+  activePlayerIndex = 0;
+  renderTurnSuggestions();
   if (typeof window.resetPlayPanel === 'function') {
     window.resetPlayPanel();
   }
@@ -245,4 +335,9 @@ function showToast(msg) {
 
 initScores();
 buildTable();
-initYamsPlayPanel({ onMessage: showToast });
+initYamsPlayPanel({
+  onMessage: showToast,
+  onRollResult,
+  onTryNextPlayer,
+  onPlayerChange,
+});

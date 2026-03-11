@@ -135,6 +135,7 @@ table {
 
 .score-row:nth-child(even) td { background: rgba(196,184,154,0.18); }
 .score-row:hover td { background: rgba(181,67,42,0.06); }
+.score-row.is-turn-selectable td { background: rgba(46,110,68,0.06); }
 
 /* ── COLONNE NOM DE COMBINAISON ── */
 .col-combo {
@@ -196,7 +197,23 @@ table {
 
 .score-cell input:focus { background: rgba(181,67,42,0.12); color: var(--accent); cursor: text; }
 .score-cell input.filled { color: var(--accent); }
+.score-cell input.suggested {
+  color: #8d816c;
+  font-style: italic;
+  cursor: pointer;
+}
+.score-cell input.suggested.selected-choice {
+  background: rgba(181,67,42,0.2);
+  color: var(--accent);
+  font-style: normal;
+  box-shadow: inset 0 0 0 1px rgba(181,67,42,0.3);
+}
 .score-cell input[readonly] { cursor: default; color: #888; font-style: italic; }
+.score-cell input[readonly].suggested { cursor: pointer; color: #8d816c; }
+.score-cell input[readonly].suggested.selected-choice {
+  color: var(--accent);
+  font-style: normal;
+}
 
 /* ── LIGNES BONUS / TOTAL ── */
 .bonus-row td, .total-row td {

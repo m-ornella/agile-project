@@ -2,7 +2,12 @@ import { YamsTurnState } from './yamsTurnState'
 
 const TOTAL_PLAYERS = 4
 
-export function initYamsPlayPanel({ onMessage } = {}) {
+export function initYamsPlayPanel({
+  onMessage,
+  onRollResult,
+  onTryNextPlayer,
+  onPlayerChange,
+} = {}) {
   const panel = document.getElementById('playPanel')
   if (!panel) return
 
@@ -69,6 +74,13 @@ export function initYamsPlayPanel({ onMessage } = {}) {
       turnState.roll()
       render()
 
+      if (typeof onRollResult === 'function') {
+        onRollResult({
+          playerIndex: currentPlayer,
+          diceValues: turnState.getDiceValues(),
+        })
+      }
+
       if (turnState.rollsRemaining === 0) {
         notify(`${getPlayerName(currentPlayer)} a termine son tour.`)
       }
@@ -78,8 +90,20 @@ export function initYamsPlayPanel({ onMessage } = {}) {
   })
 
   nextPlayerButton.addEventListener('click', () => {
+    if (typeof onTryNextPlayer === 'function') {
+      const result = onTryNextPlayer({ playerIndex: currentPlayer })
+      if (!result?.ok) {
+        notify(result?.message || 'Validation du score requise.')
+        return
+      }
+    }
+
     currentPlayer = (currentPlayer + 1) % TOTAL_PLAYERS
     resetTurn()
+
+    if (typeof onPlayerChange === 'function') {
+      onPlayerChange(currentPlayer)
+    }
   })
 
   diceButtons.forEach(button => {
@@ -99,7 +123,15 @@ export function initYamsPlayPanel({ onMessage } = {}) {
   window.resetPlayPanel = () => {
     currentPlayer = 0
     resetTurn()
+
+    if (typeof onPlayerChange === 'function') {
+      onPlayerChange(currentPlayer)
+    }
   }
 
   render()
+
+  if (typeof onPlayerChange === 'function') {
+    onPlayerChange(currentPlayer)
+  }
 }
