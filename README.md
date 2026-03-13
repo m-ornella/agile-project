@@ -166,29 +166,6 @@ Pour arreter la base :
 docker compose down
 ```
 
-## Monitorer la base avec Adminer
-
-Adminer est disponible pour visualiser les tables, verifier les parties sauvegardees et lancer des requetes SQL.
-
-URL :
-
-```text
-http://localhost:8080
-```
-
-Parametres de connexion :
-
-- Systeme : `MySQL`
-- Serveur : `mysql`
-- Utilisateur : `root`
-- Mot de passe : `root`
-- Base de donnees : `yams`
-
-Important :
-
-- le champ `Serveur` doit etre `mysql` et non `db`
-- attendre que le conteneur MySQL soit bien demarre avec `docker compose ps`
-
 ## Lancer le backend API
 
 ```bash
