@@ -1,0 +1,29 @@
+CREATE DATABASE IF NOT EXISTS yams;
+USE yams;
+
+CREATE TABLE IF NOT EXISTS players (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL UNIQUE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS games (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  status ENUM('playing', 'finished') NOT NULL DEFAULT 'playing',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  finished_at TIMESTAMP NULL DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS game_players (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  game_id INT NOT NULL,
+  player_id INT NOT NULL,
+  score INT NOT NULL DEFAULT 0,
+  CONSTRAINT fk_game_players_game
+    FOREIGN KEY (game_id) REFERENCES games(id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_game_players_player
+    FOREIGN KEY (player_id) REFERENCES players(id)
+    ON DELETE CASCADE,
+  CONSTRAINT uq_game_player UNIQUE (game_id, player_id)
+);
