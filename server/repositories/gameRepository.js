@@ -109,9 +109,11 @@ export async function getScoreboard() {
 }
 
 export async function resetDatabase() {
-  await execute('SET FOREIGN_KEY_CHECKS = 0')
-  await execute('TRUNCATE TABLE game_players')
-  await execute('TRUNCATE TABLE games')
-  await execute('TRUNCATE TABLE players')
-  await execute('SET FOREIGN_KEY_CHECKS = 1')
+  await execute(`
+    SET FOREIGN_KEY_CHECKS = 0;
+    TRUNCATE TABLE game_players;
+    TRUNCATE TABLE games;
+    TRUNCATE TABLE players;
+    SET FOREIGN_KEY_CHECKS = 1;
+  `)
 }
