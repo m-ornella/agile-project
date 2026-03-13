@@ -54,9 +54,11 @@ export async function insertAndGetId(sql) {
 
 export async function ensurePlayer(name) {
   const safeName = escapeValue(name)
-  await execute(`INSERT INTO players (name) VALUES (${safeName}) ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)`)
-  const rows = await query('SELECT LAST_INSERT_ID();')
-  return Number(rows[0][0])
+  return insertAndGetId(`
+    INSERT INTO players (name)
+    VALUES (${safeName})
+    ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)
+  `)
 }
 
 export { escapeValue }

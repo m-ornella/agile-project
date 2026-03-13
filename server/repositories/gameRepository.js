@@ -1,4 +1,4 @@
-import { ensurePlayer, escapeValue, execute, insertAndGetId, query } from '../db.js'
+import { ensurePlayer, execute, insertAndGetId, query } from '../db.js'
 
 function mapGameRow(row) {
   return {
