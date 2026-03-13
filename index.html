@@ -11,45 +11,72 @@
 <h1>🎲 YAMS</h1>
 <p class="subtitle">Feuille de score officielle</p>
 
-<div class="scoresheet">
-  <table id="scoreTable">
-    <thead>
-      <tr class="header-row">
-        <th class="col-combo">Combinaison</th>
-        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 1" maxlength="12" data-player="0"></th>
-        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 2" maxlength="12" data-player="1"></th>
-        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 3" maxlength="12" data-player="2"></th>
-        <th class="score-cell"><input class="player-name-input" type="text" placeholder="Joueur 4" maxlength="12" data-player="3"></th>
-      </tr>
-    </thead>
-    <tbody id="scoreBody"></tbody>
-  </table>
-</div>
+<section class="setup-panel" id="setupPanel" aria-label="Preparation de la partie">
+  <div class="setup-grid">
+    <label class="setup-field" for="playerCountInput">
+      <span>Nombre de joueurs</span>
+      <input id="playerCountInput" type="number" min="1" step="1" placeholder="Ex: 4">
+    </label>
 
-<section class="play-panel" id="playPanel" aria-label="Interface de jeu">
-  <div class="play-meta">
-    <p><span class="meta-label">Joueur qui joue</span><strong id="activePlayerValue">Joueur 1</strong></p>
-    <p><span class="meta-label">Lancers restants</span><strong id="rollsRemainingValue">3</strong></p>
+    <div class="setup-field">
+      <span>Ajouter un joueur</span>
+      <div class="player-entry">
+        <input id="playerNameInput" type="text" maxlength="20" placeholder="Nom du joueur">
+        <button class="btn btn-ink" id="addPlayerButton" type="button">Ajouter</button>
+      </div>
+    </div>
   </div>
 
-  <div class="dice-row" role="group" aria-label="Des du joueur">
-    <button class="die-button is-empty" type="button" data-die-index="0" aria-label="De 1">•</button>
-    <button class="die-button is-empty" type="button" data-die-index="1" aria-label="De 2">•</button>
-    <button class="die-button is-empty" type="button" data-die-index="2" aria-label="De 3">•</button>
-    <button class="die-button is-empty" type="button" data-die-index="3" aria-label="De 4">•</button>
-    <button class="die-button is-empty" type="button" data-die-index="4" aria-label="De 5">•</button>
+  <div class="setup-status">
+    <p id="playerCountHelp">Renseignez un nombre de joueurs strictement positif.</p>
+    <p id="addedPlayersStatus">0 joueur ajoute</p>
   </div>
 
-  <p class="play-help">1er lancer: tous les des. Lancers suivants: selectionnez les des a relancer. Cliquez ensuite une proposition pour valider le score.</p>
+  <div class="player-list-card">
+    <p class="card-title">Joueurs ajoutes</p>
+    <ul class="added-player-list" id="addedPlayerList"></ul>
+  </div>
 
-  <div class="play-actions">
-    <button class="btn" id="rollButton" type="button">Lancer les 5 des</button>
+  <div class="setup-actions">
+    <button class="btn" id="startGameButton" type="button" disabled>Commencer la partie</button>
   </div>
 </section>
 
-<div class="actions">
-  <button class="btn" onclick="resetGrid()">↺ Réinitialiser</button>
-</div>
+<section class="game-shell is-hidden" id="gameShell">
+  <div class="scoresheet">
+    <table id="scoreTable">
+      <thead>
+        <tr class="header-row" id="scoreHeaderRow"></tr>
+      </thead>
+      <tbody id="scoreBody"></tbody>
+    </table>
+  </div>
+
+  <section class="play-panel" id="playPanel" aria-label="Interface de jeu">
+    <div class="play-meta">
+      <p><span class="meta-label">Joueur qui joue</span><strong id="activePlayerValue">Joueur 1</strong></p>
+      <p><span class="meta-label">Lancers restants</span><strong id="rollsRemainingValue">3</strong></p>
+    </div>
+
+    <div class="dice-row" role="group" aria-label="Des du joueur">
+      <button class="die-button is-empty" type="button" data-die-index="0" aria-label="De 1">•</button>
+      <button class="die-button is-empty" type="button" data-die-index="1" aria-label="De 2">•</button>
+      <button class="die-button is-empty" type="button" data-die-index="2" aria-label="De 3">•</button>
+      <button class="die-button is-empty" type="button" data-die-index="3" aria-label="De 4">•</button>
+      <button class="die-button is-empty" type="button" data-die-index="4" aria-label="De 5">•</button>
+    </div>
+
+    <p class="play-help">1er lancer: tous les des. Lancers suivants: selectionnez les des a relancer. Cliquez ensuite une proposition pour valider le score.</p>
+
+    <div class="play-actions">
+      <button class="btn" id="rollButton" type="button">Lancer les 5 des</button>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button class="btn" id="resetGameButton" type="button">↺ Réinitialiser</button>
+  </div>
+</section>
 
 <div class="toast" id="toast"></div>
 

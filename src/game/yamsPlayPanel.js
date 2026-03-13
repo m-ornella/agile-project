@@ -1,38 +1,39 @@
 import { YamsTurnState } from './yamsTurnState'
 
-const TOTAL_PLAYERS = 4
-
 export function initYamsPlayPanel({
+  totalPlayers,
+  getPlayerName,
   onMessage,
   onRollResult,
   onPlayerChange,
 } = {}) {
   const panel = document.getElementById('playPanel')
-  if (!panel) return
+  if (!panel) return null
 
   const activePlayerValue = document.getElementById('activePlayerValue')
   const rollsRemainingValue = document.getElementById('rollsRemainingValue')
   const rollButton = document.getElementById('rollButton')
   const diceButtons = Array.from(panel.querySelectorAll('.die-button'))
-  const playerNameInputs = Array.from(document.querySelectorAll('.player-name-input'))
-
   const turnState = new YamsTurnState()
+
   let currentPlayer = 0
 
-  const getPlayerName = playerIndex => {
-    const input = playerNameInputs[playerIndex]
-    if (!input) return `Joueur ${playerIndex + 1}`
+  const resolvePlayerName = playerIndex => {
+    if (typeof getPlayerName === 'function') {
+      return getPlayerName(playerIndex)
+    }
 
-    const customName = input.value.trim()
-    return customName || input.placeholder || `Joueur ${playerIndex + 1}`
+    return `Joueur ${playerIndex + 1}`
   }
 
   const notify = message => {
-    if (typeof onMessage === 'function') onMessage(message)
+    if (typeof onMessage === 'function') {
+      onMessage(message)
+    }
   }
 
   const render = () => {
-    activePlayerValue.textContent = getPlayerName(currentPlayer)
+    activePlayerValue.textContent = resolvePlayerName(currentPlayer)
     rollsRemainingValue.textContent = String(turnState.rollsRemaining)
 
     const canRoll = turnState.rollsRemaining > 0
@@ -67,7 +68,7 @@ export function initYamsPlayPanel({
     render()
   }
 
-  rollButton.addEventListener('click', () => {
+  const handleRoll = () => {
     try {
       turnState.roll()
       render()
@@ -80,15 +81,15 @@ export function initYamsPlayPanel({
       }
 
       if (turnState.rollsRemaining === 0) {
-        notify(`${getPlayerName(currentPlayer)} a termine son tour.`)
+        notify(`${resolvePlayerName(currentPlayer)} a termine son tour.`)
       }
     } catch (error) {
       notify(error.message)
     }
-  })
+  }
 
   const advanceToNextPlayer = () => {
-    currentPlayer = (currentPlayer + 1) % TOTAL_PLAYERS
+    currentPlayer = (currentPlayer + 1) % totalPlayers
     resetTurn()
 
     if (typeof onPlayerChange === 'function') {
@@ -96,33 +97,34 @@ export function initYamsPlayPanel({
     }
   }
 
-  diceButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const dieIndex = Number(button.dataset.dieIndex)
-      turnState.toggleDieSelection(dieIndex)
-      render()
-    })
-  })
-
-  playerNameInputs.forEach((input, index) => {
-    input.addEventListener('input', () => {
-      if (index === currentPlayer) render()
-    })
-  })
-
-  window.resetPlayPanel = () => {
-    currentPlayer = 0
-    resetTurn()
-
-    if (typeof onPlayerChange === 'function') {
-      onPlayerChange(currentPlayer)
-    }
+  const handleDieClick = event => {
+    const dieIndex = Number(event.currentTarget.dataset.dieIndex)
+    turnState.toggleDieSelection(dieIndex)
+    render()
   }
-  window.advanceToNextPlayer = advanceToNextPlayer
+
+  rollButton.addEventListener('click', handleRoll)
+  diceButtons.forEach(button => button.addEventListener('click', handleDieClick))
 
   render()
 
   if (typeof onPlayerChange === 'function') {
     onPlayerChange(currentPlayer)
+  }
+
+  return {
+    advanceToNextPlayer,
+    reset() {
+      currentPlayer = 0
+      resetTurn()
+
+      if (typeof onPlayerChange === 'function') {
+        onPlayerChange(currentPlayer)
+      }
+    },
+    destroy() {
+      rollButton.removeEventListener('click', handleRoll)
+      diceButtons.forEach(button => button.removeEventListener('click', handleDieClick))
+    },
   }
 }

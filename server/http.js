@@ -9,7 +9,12 @@ import {
 } from './repositories/gameRepository.js'
 
 function json(res, statusCode, payload) {
-  res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' })
+  res.writeHead(statusCode, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  })
   res.end(JSON.stringify(payload))
 }
 
@@ -43,6 +48,16 @@ export async function requestListener(req, res) {
   const pathname = url.pathname
 
   try {
+    if (method === 'OPTIONS') {
+      res.writeHead(204, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      })
+      res.end()
+      return
+    }
+
     if (method === 'POST' && pathname === '/games') {
       const game = await createGame()
       return json(res, 201, game)
