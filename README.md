@@ -8,8 +8,8 @@ Application web de feuille de score Yams multijoueur avec lancers de des, calcul
 |---|---|
 | Louis Brousse | Developpeur / integration |
 | Samuel Vidal | Developpeur |
-| m-ornella | Scrum Master *(a ajuster si besoin)* |
-| Vydeuh | Product Owner *(a ajuster si besoin)* |
+| Marie-Ornella Vitry | Scrum Master |
+| Aymeric Barbot | Product Owner |
 
 ## La vision produit
 
@@ -92,8 +92,65 @@ Pourquoi : stack simple, rapide a mettre en place pendant l'atelier, suffisante 
 ## Lancer le projet en local
 
 ```bash
+git clone https://github.com/m-ornella/agile-project.git
+cd agile-project
 npm install
 npm run dev
 ```
 
 Puis ouvrir l'URL affichee par Vite dans le navigateur.
+
+## Lancer la base de donnees
+
+L'application utilise MySQL pour sauvegarder les parties, reprendre une partie enregistree et calculer le scoreboard global.
+
+```bash
+cp .env.example .env
+docker compose up -d
+docker compose ps
+```
+
+Pour arreter la base :
+
+```bash
+docker compose down
+```
+
+## Lancer le backend API
+
+```bash
+node server/index.js
+```
+
+Le serveur backend demarre par defaut sur `http://localhost:3000`.
+
+## Tests fonctionnels
+
+Les tests fonctionnels verifies pour l'US base de donnees couvrent :
+
+- la creation d'une partie
+- l'association des joueurs a une partie
+- la sauvegarde des scores
+- la reprise d'une partie sauvegardee
+- le scoreboard global
+
+Execution :
+
+```bash
+node --test test/functional/*.test.js
+```
+
+## Endpoints REST
+
+```text
+POST   /games
+GET    /games
+GET    /games/:id
+POST   /games/:id/players
+PUT    /games/:id/score
+GET    /scoreboard
+```
+
+## Kanban avec Trello
+
+Lien Trello : https://trello.com/invite/b/69b128c35d2e49140737d748/ATTI855e5e951a93f3e3b303b2a5964de6b6E5EAC80F/cours-agile
