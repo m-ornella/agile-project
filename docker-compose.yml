@@ -16,5 +16,13 @@ services:
       timeout: 3s
       retries: 20
 
+  adminer:
+    image: adminer:4
+    container_name: agile-project-adminer
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+
 volumes:
   mysql_data:
